@@ -6,16 +6,8 @@ function initZenMailPoetPopups() {
     const popupWrappers = document.querySelectorAll('.zen-mp-popup-wrapper');
     
     popupWrappers.forEach(function(wrapper) {
-        const formId = wrapper.getAttribute('data-form-id');
-        if (!formId) return;
-
-        const hiddenContainer = wrapper.querySelector('.zen-mp-hidden-form-container');
-        const hiddenForm = hiddenContainer ? hiddenContainer.querySelector('form') : null;
-        
-        if (!hiddenForm) {
-            console.error(`Zen MailPoet Helper: Native form for ID ${formId} not found.`);
-            return;
-        }
+        const listIds = wrapper.getAttribute('data-list-ids');
+        if (!listIds) return;
 
         const customForm = wrapper.querySelector('.zen-mp-custom-form');
         const customEmailInput = customForm.querySelector('.zen-mp-input-email');
@@ -26,10 +18,10 @@ function initZenMailPoetPopups() {
         const feedbackMessage = wrapper.querySelector('.zen-mp-feedback-message');
         const closeBtns = wrapper.querySelectorAll('.zen-mp-close-btn, .zen-mp-overlay');
 
-        // Storage keys
-        const subscribedKey = `zen_mp_subscribed_${formId}`;
-        const dismissedKey = `zen_mp_dismissed_${formId}`;
-        const dismissedExpiryKey = `zen_mp_dismissed_expiry_${formId}`;
+        // Storage keys based on lists configuration
+        const subscribedKey = `zen_mp_subscribed_${listIds.replace(/,/g, '_')}`;
+        const dismissedKey = `zen_mp_dismissed_${listIds.replace(/,/g, '_')}`;
+        const dismissedExpiryKey = `zen_mp_dismissed_expiry_${listIds.replace(/,/g, '_')}`;
 
         // 1. Check if we should display the popup
         if (shouldShowPopup(subscribedKey, dismissedKey, dismissedExpiryKey)) {
@@ -56,44 +48,7 @@ function initZenMailPoetPopups() {
             }
         });
 
-        // 3. Find hidden MailPoet inputs
-        // MailPoet names are obfuscated, but they have distinct data-automation-id attributes.
-        const hiddenEmailInput = hiddenForm.querySelector('[data-automation-id="form_email"]') || 
-                                 hiddenForm.querySelector(`#form_email_${formId}`) ||
-                                 hiddenForm.querySelector('input[type="email"]');
-
-        if (!hiddenEmailInput) {
-            console.error(`Zen MailPoet Helper: Hidden email field for form ${formId} not found.`);
-            return;
-        }
-
-        // 4. Setup MutationObserver to watch hidden form messages
-        const messageContainer = hiddenForm.querySelector('.mailpoet_message');
-        if (messageContainer) {
-            setupObserver(messageContainer, {
-                onSuccess: function(msg) {
-                    showFeedback(feedbackContainer, feedbackMessage, msg, 'success');
-                    setSubscribedState(subscribedKey);
-                    resetFormState(submitBtn, btnText, btnLoader);
-                    
-                    // Clear custom inputs and checkboxes
-                    if (customEmailInput) customEmailInput.value = '';
-                    const privacyCheckbox = customForm.querySelector('.zen-mp-checkbox-input');
-                    if (privacyCheckbox) privacyCheckbox.checked = false;
-
-                    // Automatically close the popup after a brief delay
-                    setTimeout(function() {
-                        closePopup(wrapper);
-                    }, 3000);
-                },
-                onError: function(msg) {
-                    showFeedback(feedbackContainer, feedbackMessage, msg, 'error');
-                    resetFormState(submitBtn, btnText, btnLoader);
-                }
-            });
-        }
-
-        // 5. Handle submission of the custom form
+        // 3. Handle submission of the custom form
         customForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -111,48 +66,94 @@ function initZenMailPoetPopups() {
                 return;
             }
 
-            // Copy value to MailPoet's hidden field
-            hiddenEmailInput.value = emailValue;
-            
-            // Check if there are other fields we need to sync (like names)
-            const customFirstNameInput = customForm.querySelector('.zen-mp-input-first-name');
-            if (customFirstNameInput) {
-                const hiddenFirstNameInput = hiddenForm.querySelector('[data-automation-id="form_first_name"]') ||
-                                             hiddenForm.querySelector(`#form_first_name_${formId}`);
-                if (hiddenFirstNameInput) {
-                    hiddenFirstNameInput.value = customFirstNameInput.value.trim();
-                }
-            }
-
-            const customLastNameInput = customForm.querySelector('.zen-mp-input-last-name');
-            if (customLastNameInput) {
-                const hiddenLastNameInput = hiddenForm.querySelector('[data-automation-id="form_last_name"]') ||
-                                            hiddenForm.querySelector(`#form_last_name_${formId}`);
-                if (hiddenLastNameInput) {
-                    hiddenLastNameInput.value = customLastNameInput.value.trim();
-                }
-            }
-
             // Set loading state
             submitBtn.disabled = true;
             btnText.style.display = 'none';
             btnLoader.style.display = 'inline-block';
             feedbackContainer.style.display = 'none';
 
-            // Trigger click on MailPoet's hidden submit button to run MailPoet's validation and AJAX
-            const hiddenSubmitBtn = hiddenForm.querySelector('input[type="submit"]') || 
-                                    hiddenForm.querySelector('button[type="submit"]') ||
-                                    hiddenForm.querySelector('.mailpoet_submit');
-            
-            if (hiddenSubmitBtn) {
-                hiddenSubmitBtn.click();
-            } else {
-                // Fallback: Dispatch submit event directly to form
-                hiddenForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-            }
+            // Gather custom message configs from attributes
+            const msgSuccess = wrapper.getAttribute('data-msg-success') || '';
+            const msgError = wrapper.getAttribute('data-msg-error') || '';
+            const msgAlready = wrapper.getAttribute('data-msg-already') || '';
+
+            // Construct payload
+            const formData = new FormData();
+            formData.append('action', 'zen_mailpoet_subscribe');
+            formData.append('security', zenMailPoetHelper.nonce);
+            formData.append('email', emailValue);
+            formData.append('list_ids', listIds);
+            formData.append('msg_success', msgSuccess);
+            formData.append('msg_error', msgError);
+            formData.append('msg_already', msgAlready);
+
+            // Implement 10-second timeout using AbortController
+            const controller = new AbortController();
+            const timeoutId = setTimeout(function() {
+                controller.abort();
+            }, 10000); // 10 seconds
+
+            fetch(zenMailPoetHelper.ajax_url, {
+                method: 'POST',
+                body: formData,
+                signal: controller.signal
+            })
+            .then(function(response) {
+                clearTimeout(timeoutId);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(function(res) {
+                if (res.success) {
+                    // Success condition (subscribed)
+                    showFeedback(feedbackContainer, feedbackMessage, res.message, 'success');
+                    
+                    if (res.code === 'subscribed') {
+                        setSubscribedState(subscribedKey);
+                    }
+
+                    // Reset form fields
+                    if (customEmailInput) customEmailInput.value = '';
+                    if (privacyCheckbox) privacyCheckbox.checked = false;
+
+                    // Reset form submit button state
+                    resetFormState(submitBtn, btnText, btnLoader);
+
+                    // If response contract specifies closing the popup
+                    if (res.closePopup) {
+                        setTimeout(function() {
+                            closePopup(wrapper);
+                        }, 3000);
+                    }
+                } else {
+                    // Failure condition (already subscribed, invalid email, config issues, etc.)
+                    showFeedback(feedbackContainer, feedbackMessage, res.message || 'Subscription failed.', 'error');
+                    resetFormState(submitBtn, btnText, btnLoader);
+
+                    // If the user is already subscribed, let's persist that status in localStorage too
+                    if (res.code === 'already_subscribed') {
+                        setSubscribedState(subscribedKey);
+                        setTimeout(function() {
+                            closePopup(wrapper);
+                        }, 3000);
+                    }
+                }
+            })
+            .catch(function(error) {
+                clearTimeout(timeoutId);
+                resetFormState(submitBtn, btnText, btnLoader);
+
+                if (error.name === 'AbortError') {
+                    showFeedback(feedbackContainer, feedbackMessage, 'The request timed out. Please try again.', 'error');
+                } else {
+                    showFeedback(feedbackContainer, feedbackMessage, 'An unexpected network error occurred.', 'error');
+                }
+            });
         });
 
-        // 6. Slideshow logic (Transitions every 4 seconds)
+        // 4. Slideshow logic (Transitions every 4 seconds)
         const slides = wrapper.querySelectorAll('.zen-mp-slide');
         if (slides.length > 1) {
             let currentSlideIndex = 0;
@@ -240,36 +241,4 @@ function setDismissedState(dismissedKey, expiryKey, days) {
     localStorage.setItem(dismissedKey, 'true');
     const expiryTime = Date.now() + (days * 24 * 60 * 60 * 1000);
     localStorage.setItem(expiryKey, expiryTime.toString());
-}
-
-/**
- * Set up a MutationObserver to listen to MailPoet's AJAX feedback changes
- */
-function setupObserver(targetNode, callbacks) {
-    const config = { attributes: true, childList: true, subtree: true, characterData: true };
-
-    const observer = new MutationObserver(function(mutationsList) {
-        const successParagraph = targetNode.querySelector('.mailpoet_validate_success');
-        const errorParagraph = targetNode.querySelector('.mailpoet_validate_error');
-
-        // Check success message
-        if (successParagraph && isElementVisible(successParagraph) && successParagraph.textContent.trim() !== '') {
-            callbacks.onSuccess(successParagraph.textContent.trim());
-        }
-        // Check error message
-        else if (errorParagraph && isElementVisible(errorParagraph) && errorParagraph.textContent.trim() !== '') {
-            callbacks.onError(errorParagraph.textContent.trim());
-        }
-    });
-
-    observer.observe(targetNode, config);
-}
-
-/**
- * Helper to check if a DOM element is visible
- */
-function isElementVisible(element) {
-    if (!element) return false;
-    const style = window.getComputedStyle(element);
-    return style.display !== 'none' && style.visibility !== 'hidden' && element.offsetWidth > 0 && element.offsetHeight > 0;
 }

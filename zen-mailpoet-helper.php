@@ -2,7 +2,7 @@
 /**
  * Plugin Name: zen-mailpoet-helper
  * Plugin URI: https://zenctuary.com
- * Description: Integrates custom-designed premium HTML/CSS subscription popups with MailPoet forms.
+ * Description: Integrates custom-designed premium HTML/CSS subscription popups with MailPoet lists via a secure AJAX endpoint.
  * Version: 1.0.0
  * Author: Antigravity
  * Text Domain: zen-mail-poet-helper
@@ -11,6 +11,10 @@
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
+
+// Load service adapter and AJAX handlers
+require_once plugin_dir_path(__FILE__) . 'includes/services/mailpoet-adapter.php';
+require_once plugin_dir_path(__FILE__) . 'includes/ajax/subscribe.php';
 
 class Zen_MailPoet_Helper {
 
@@ -46,6 +50,16 @@ class Zen_MailPoet_Helper {
             '1.0.0',
             true
         );
+
+        // Localize script with AJAX URL and secure CSRF Nonce token
+        wp_localize_script(
+            'zen-mailpoet-helper-script',
+            'zenMailPoetHelper',
+            array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce'    => wp_create_nonce('zen-mailpoet-subscribe-nonce'),
+            )
+        );
     }
 
     /**
@@ -54,21 +68,24 @@ class Zen_MailPoet_Helper {
     public function render_popup_shortcode($atts) {
         $atts = shortcode_atts(
             array(
-                'form_id'      => '',
-                'images'       => '',
-                'title'        => esc_html__('SUBSCRIBE & GET 10% OFF YOUR FIRST PURCHASE', 'zen-mailpoet-helper'),
-                'subtitle'     => esc_html__('Subscribe to our mindful newsletter and stay connected with upcoming classes, events, and gentle inspirations.', 'zen-mailpoet-helper'),
-                'privacy_text' => esc_html__('I accept the Privacy Policy', 'zen-mailpoet-helper'),
-                'privacy_link' => '#',
+                'list_ids'                   => '',
+                'images'                     => '',
+                'title'                      => esc_html__('SUBSCRIBE & GET 10% OFF YOUR FIRST PURCHASE', 'zen-mailpoet-helper'),
+                'subtitle'                   => esc_html__('Subscribe to our mindful newsletter and stay connected with upcoming classes, events, and gentle inspirations.', 'zen-mailpoet-helper'),
+                'privacy_text'               => esc_html__('I accept the Privacy Policy', 'zen-mailpoet-helper'),
+                'privacy_link'               => '#',
+                'success_message'            => esc_html__('Thank you! You have successfully subscribed.', 'zen-mailpoet-helper'),
+                'error_message'              => esc_html__('An error occurred. Please try again.', 'zen-mailpoet-helper'),
+                'already_subscribed_message' => esc_html__('You are already subscribed to this newsletter.', 'zen-mailpoet-helper'),
             ),
             $atts,
             'zen_mailpoet_popup'
         );
 
-        $form_id = sanitize_text_field($atts['form_id']);
+        $list_ids = sanitize_text_field($atts['list_ids']);
 
-        if (empty($form_id)) {
-            return '<!-- Zen MailPoet Helper: Missing form_id parameter -->';
+        if (empty($list_ids)) {
+            return '<!-- Zen MailPoet Helper: Missing list_ids parameter -->';
         }
 
         // Check if MailPoet is active
@@ -79,9 +96,6 @@ class Zen_MailPoet_Helper {
         // Enqueue registered assets
         wp_enqueue_style('zen-mailpoet-helper-style');
         wp_enqueue_script('zen-mailpoet-helper-script');
-
-        // Capture MailPoet form HTML
-        $mailpoet_form_html = do_shortcode('[mailpoet_form id="' . esc_attr($form_id) . '"]');
 
         // Parse images parameter or fall back to default assets
         $images_str = sanitize_text_field($atts['images']);
@@ -98,11 +112,12 @@ class Zen_MailPoet_Helper {
         ob_start();
         ?>
         <!-- Zen MailPoet Helper Wrapper -->
-        <div class="zen-mp-popup-wrapper" data-form-id="<?php echo esc_attr($form_id); ?>" style="display: none;">
-            <!-- Hidden native MailPoet form bridge -->
-            <div class="zen-mp-hidden-form-container" style="display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; overflow: hidden !important;">
-                <?php echo $mailpoet_form_html; ?>
-            </div>
+        <div class="zen-mp-popup-wrapper" 
+             data-list-ids="<?php echo esc_attr($list_ids); ?>" 
+             data-msg-success="<?php echo esc_attr($atts['success_message']); ?>"
+             data-msg-error="<?php echo esc_attr($atts['error_message']); ?>"
+             data-msg-already="<?php echo esc_attr($atts['already_subscribed_message']); ?>"
+             style="display: none;">
 
             <!-- Custom Premium Popup Modal Overlay -->
             <div class="zen-mp-overlay"></div>
