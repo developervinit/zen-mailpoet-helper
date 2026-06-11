@@ -1,0 +1,400 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* Reset and variables */
+.zen-mp-popup-wrapper {
+    --zen-primary: #cca853; /* Warm Gold */
+    --zen-primary-hover: #bfa04a;
+    --zen-dark: #3a3a3a; /* Charcoal grey background */
+    --zen-light: #ffffff; 
+    --zen-gray: #d1d5db; /* Light grey text */
+    --zen-border: rgba(255, 255, 255, 0.3);
+    --zen-error: #ef4444;
+    --zen-success: #10b981;
+    --zen-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.5);
+    --zen-font: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    
+    font-family: var(--zen-font);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s;
+    box-sizing: border-box;
+}
+
+.zen-mp-popup-wrapper * {
+    box-sizing: border-box;
+}
+
+.zen-mp-popup-wrapper.zen-mp-active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Glassmorphism background overlay */
+.zen-mp-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 1;
+}
+
+/* Modal Card */
+.zen-mp-modal-card {
+    position: relative;
+    background: #ffffff;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 860px;
+    box-shadow: var(--zen-shadow);
+    z-index: 2;
+    transform: scale(0.95) translateY(20px);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+.zen-mp-popup-wrapper.zen-mp-active .zen-mp-modal-card {
+    transform: scale(1) translateY(0);
+}
+
+/* Close Button (Circle with X) */
+.zen-mp-close-btn {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: transparent;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+    padding: 0;
+}
+
+.zen-mp-close-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    transform: rotate(90deg);
+}
+
+/* Split Layout */
+.zen-mp-layout-split {
+    display: flex;
+    flex-direction: row;
+    height: 520px;
+    width: 100%;
+}
+
+/* Left Column: Media Slideshow */
+.zen-mp-col-media {
+    flex: 1.1;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    background-color: #f1f5f9;
+}
+
+.zen-mp-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    z-index: 1;
+    transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.zen-mp-slide-active {
+    opacity: 1;
+    z-index: 2;
+}
+
+/* Right Column: Content Form */
+.zen-mp-col-content {
+    flex: 1;
+    background-color: var(--zen-dark);
+    height: 100%;
+    padding: 50px 48px;
+    display: flex;
+    align-items: center;
+}
+
+.zen-mp-content-body {
+    width: 100%;
+}
+
+.zen-mp-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--zen-primary); /* Gold Accent */
+    margin: 0 0 16px 0;
+    line-height: 1.3;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.zen-mp-subtitle {
+    font-size: 15px;
+    color: var(--zen-gray);
+    line-height: 1.6;
+    margin: 0 0 32px 0;
+    font-weight: 300;
+}
+
+/* Custom Custom Form */
+.zen-mp-custom-form {
+    width: 100%;
+}
+
+/* Inline Input and Arrow Container */
+.zen-mp-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.zen-mp-input-email {
+    width: 100%;
+    padding: 16px 54px 16px 20px;
+    font-size: 16px;
+    border: 1.5px solid var(--zen-border);
+    border-radius: 8px;
+    outline: none;
+    background: transparent;
+    color: #ffffff;
+    font-family: var(--zen-font);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.zen-mp-input-email::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.zen-mp-input-email:focus {
+    border-color: var(--zen-primary);
+    box-shadow: 0 0 0 3px rgba(204, 168, 83, 0.25);
+}
+
+/* Submit Arrow Button */
+.zen-mp-submit-btn {
+    position: absolute;
+    right: 14px;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    outline: none;
+    z-index: 5;
+}
+
+.zen-mp-submit-btn:hover {
+    color: var(--zen-primary);
+    transform: translateX(3px);
+}
+
+.zen-mp-submit-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Loader style */
+.zen-mp-btn-loader {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    border-top-color: #ffffff;
+    animation: zen-mp-spin 0.8s linear infinite;
+    display: inline-block;
+}
+
+@keyframes zen-mp-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Custom Checkbox Design */
+.zen-mp-checkbox-container {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.zen-mp-checkbox-input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.zen-mp-checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--zen-gray);
+    user-select: none;
+    line-height: 1.4;
+}
+
+.zen-mp-checkbox-box {
+    position: relative;
+    height: 20px;
+    width: 20px;
+    background-color: transparent;
+    border: 1.5px solid var(--zen-border);
+    border-radius: 6px;
+    margin-right: 12px;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Checkbox Checked state */
+.zen-mp-checkbox-input:checked ~ .zen-mp-checkbox-label .zen-mp-checkbox-box {
+    background-color: rgba(204, 168, 83, 0.15);
+    border-color: var(--zen-primary);
+}
+
+/* Checkbox Checkmark (Hidden by default) */
+.zen-mp-checkbox-box::after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid var(--zen-primary);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Show checkmark when checked */
+.zen-mp-checkbox-input:checked ~ .zen-mp-checkbox-label .zen-mp-checkbox-box::after {
+    display: block;
+}
+
+.zen-mp-checkbox-text {
+    padding-top: 1px;
+}
+
+/* Privacy Policy Gold Link */
+.zen-mp-privacy-link {
+    color: var(--zen-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: border-bottom 0.2s ease;
+    border-bottom: 1px solid transparent;
+}
+
+.zen-mp-privacy-link:hover {
+    border-bottom-color: var(--zen-primary);
+}
+
+/* Feedback messages container */
+.zen-mp-feedback-container {
+    margin-top: 20px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    animation: zen-mp-fade-in 0.3s ease-out;
+}
+
+.zen-mp-feedback-container.zen-mp-success {
+    background-color: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.zen-mp-feedback-container.zen-mp-error {
+    background-color: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.zen-mp-feedback-message {
+    font-size: 14px;
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.zen-mp-success .zen-mp-feedback-message {
+    color: var(--zen-success);
+}
+
+.zen-mp-error .zen-mp-feedback-message {
+    color: var(--zen-error);
+}
+
+@keyframes zen-mp-fade-in {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive Rules */
+@media (max-width: 768px) {
+    .zen-mp-modal-card {
+        max-width: 440px;
+    }
+    
+    .zen-mp-layout-split {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    .zen-mp-col-media {
+        height: 180px;
+    }
+    
+    .zen-mp-col-content {
+        padding: 36px 24px;
+        text-align: center;
+    }
+    
+    .zen-mp-checkbox-container {
+        justify-content: center;
+        text-align: left;
+    }
+    
+    .zen-mp-close-btn {
+        top: 12px;
+        right: 12px;
+        color: #ffffff;
+        background: rgba(15, 23, 42, 0.5);
+    }
+    
+    .zen-mp-close-btn:hover {
+        background: rgba(15, 23, 42, 0.7);
+    }
+    
+    .zen-mp-title {
+        font-size: 22px;
+    }
+}
