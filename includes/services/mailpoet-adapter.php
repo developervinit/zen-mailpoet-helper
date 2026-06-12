@@ -71,6 +71,23 @@ class Zen_MailPoet_Adapter {
             return $this->map_errors($e);
         }
     }
+    /**
+     * Retrieve all available MailPoet subscriber lists.
+     *
+     * @return array
+     */
+    public function get_lists() {
+        if (!class_exists('\MailPoet\API\API')) {
+            return array();
+        }
+
+        try {
+            $mailpoet_api = \MailPoet\API\API::MP('v1');
+            return $mailpoet_api->getLists();
+        } catch (\Exception $e) {
+            return array();
+        }
+    }
 
     /**
      * Normalize MailPoet success responses into our custom contract.

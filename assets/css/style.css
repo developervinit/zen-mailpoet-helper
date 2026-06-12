@@ -398,3 +398,21 @@
         font-size: 22px;
     }
 }
+
+/* Responsive device visibility helper classes */
+@media (min-width: 1025px) {
+    .zen-mp-hide-desktop {
+        display: none !important;
+    }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+    .zen-mp-hide-tablet {
+        display: none !important;
+    }
+}
+@media (max-width: 768px) {
+    .zen-mp-hide-mobile {
+        display: none !important;
+    }
+}
+

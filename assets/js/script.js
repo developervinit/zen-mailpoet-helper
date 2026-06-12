@@ -24,19 +24,24 @@ function initZenMailPoetPopups() {
         const dismissedExpiryKey = `zen_mp_dismissed_expiry_${listIds.replace(/,/g, '_')}`;
 
         // 1. Check if we should display the popup
+        const delayAttr = wrapper.getAttribute('data-delay');
+        const delay = delayAttr ? parseInt(delayAttr, 10) : 2500;
+        const frequencyAttr = wrapper.getAttribute('data-frequency');
+        const frequency = frequencyAttr ? parseInt(frequencyAttr, 10) : 30;
+
         if (shouldShowPopup(subscribedKey, dismissedKey, dismissedExpiryKey)) {
-            // Display popup after a delay of 2.5 seconds
+            // Display popup after a delay
             setTimeout(function() {
                 openPopup(wrapper);
-            }, 2500);
+            }, delay);
         }
 
         // 2. Close event handlers
         closeBtns.forEach(function(btn) {
             btn.addEventListener('click', function() {
                 closePopup(wrapper);
-                // Set dismissal cookie/localStorage for 30 days
-                setDismissedState(dismissedKey, dismissedExpiryKey, 30);
+                // Set dismissal cookie/localStorage for configured frequency days
+                setDismissedState(dismissedKey, dismissedExpiryKey, frequency);
             });
         });
 
@@ -44,7 +49,7 @@ function initZenMailPoetPopups() {
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && wrapper.classList.contains('zen-mp-active')) {
                 closePopup(wrapper);
-                setDismissedState(dismissedKey, dismissedExpiryKey, 30);
+                setDismissedState(dismissedKey, dismissedExpiryKey, frequency);
             }
         });
 
