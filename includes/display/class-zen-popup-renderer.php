@@ -12,6 +12,9 @@ class Zen_Popup_Renderer {
     private static $instance = null;
     public static $shortcode_rendered = false;
 
+    private $should_render = false;
+    private $active_popup_id = 0;
+
     public static function get_instance() {
         if (self::$instance == null) {
             self::$instance = new self();
@@ -20,16 +23,17 @@ class Zen_Popup_Renderer {
     }
 
     private function __construct() {
+        add_action('wp_enqueue_scripts', array($this, 'evaluate_and_enqueue_assets'), 11);
         add_action('wp_footer', array($this, 'maybe_render_global_popup'));
         add_shortcode('zen_mailpoet_popup', array($this, 'render_shortcode_popup'));
     }
 
     /**
-     * Renders the active global popup in wp_footer if rules match.
+     * Evaluates display rules and enqueues assets early in the page load.
      */
-    public function maybe_render_global_popup() {
-        // Do not render in admin or if a shortcode already rendered a popup
-        if (is_admin() || self::$shortcode_rendered) {
+    public function evaluate_and_enqueue_assets() {
+        // Do not process in admin
+        if (is_admin()) {
             return;
         }
 
@@ -59,22 +63,37 @@ class Zen_Popup_Renderer {
 
         if ($show_on === 'selected') {
             $selected_pages = isset($display_rules['selected_pages']) ? $display_rules['selected_pages'] : array();
+            $selected_pages = array_map('intval', $selected_pages);
             if (!is_page($selected_pages)) {
                 return;
             }
         } elseif ($show_on === 'excluded') {
             $excluded_pages = isset($display_rules['excluded_pages']) ? $display_rules['excluded_pages'] : array();
+            $excluded_pages = array_map('intval', $excluded_pages);
             if (is_page($excluded_pages)) {
                 return;
             }
         }
 
-        // Enqueue Assets
+        // Rules satisfied, store popup state and enqueue assets
+        $this->should_render = true;
+        $this->active_popup_id = $popup->ID;
+
         wp_enqueue_style('zen-mailpoet-helper-style');
         wp_enqueue_script('zen-mailpoet-helper-script');
+    }
+
+    /**
+     * Renders the active global popup in wp_footer if rules match.
+     */
+    public function maybe_render_global_popup() {
+        // Do not render in admin, if not flagged, or if a shortcode already rendered a popup
+        if (is_admin() || !$this->should_render || self::$shortcode_rendered) {
+            return;
+        }
 
         // Render Popup HTML
-        echo $this->get_popup_html($popup->ID);
+        echo $this->get_popup_html($this->active_popup_id);
     }
 
     /**

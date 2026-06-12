@@ -34,7 +34,7 @@ class Zen_MailPoet_Helper {
 
     private function __construct() {
         add_shortcode('zen_mailpoet_popup', array($this, 'render_popup_shortcode'));
-        add_action('wp_enqueue_scripts', array($this, 'register_assets'));
+        add_action('wp_enqueue_scripts', array($this, 'register_assets'), 9);
         
         // Initialize admin and renderer components
         if (is_admin()) {
