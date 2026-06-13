@@ -32,7 +32,7 @@ class Zen_MailPoet_AJAX_Subscribe {
 
         // Validation: Email is required and must be valid format
         if (empty($email) || !is_email($email)) {
-            wp_send_json_success(array(
+            wp_send_json(array(
                 'success' => false,
                 'code'    => 'email_invalid',
                 'message' => __('Please enter a valid email address.', 'zen-mailpoet-helper')
@@ -48,7 +48,7 @@ class Zen_MailPoet_AJAX_Subscribe {
 
         // Validation: List configuration is required
         if (empty($list_ids)) {
-            wp_send_json_success(array(
+            wp_send_json(array(
                 'success' => false,
                 'code'    => 'missing_list_configuration',
                 'message' => __('No subscriber list has been configured for this popup.', 'zen-mailpoet-helper')
@@ -72,14 +72,14 @@ class Zen_MailPoet_AJAX_Subscribe {
             if ($result['success']) {
                 if ($result['code'] === 'already_subscribed') {
                     // Subscription exists: return failure state with custom message
-                    wp_send_json_success(array(
+                    wp_send_json(array(
                         'success' => false,
                         'code'    => 'already_subscribed',
                         'message' => $msg_already
                     ));
                 } else {
                     // New subscription successful
-                    wp_send_json_success(array(
+                    wp_send_json(array(
                         'success'    => true,
                         'code'       => 'subscribed',
                         'closePopup' => true,
@@ -95,7 +95,7 @@ class Zen_MailPoet_AJAX_Subscribe {
                     $mapped_msg = __('Email address is required.', 'zen-mailpoet-helper');
                 }
 
-                wp_send_json_success(array(
+                wp_send_json(array(
                     'success' => false,
                     'code'    => $result['code'],
                     'message' => $mapped_msg
@@ -104,7 +104,7 @@ class Zen_MailPoet_AJAX_Subscribe {
 
         } catch (\Exception $e) {
             // General configuration or API load failure
-            wp_send_json_success(array(
+            wp_send_json(array(
                 'success' => false,
                 'code'    => 'service_error',
                 'message' => $e->getMessage()
