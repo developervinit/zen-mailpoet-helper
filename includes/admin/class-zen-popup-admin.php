@@ -615,18 +615,19 @@ class Zen_Popup_Admin {
         // Enqueue only on CPT screen
         global $post_type;
         if (($hook === 'post.php' || $hook === 'post-new.php') && $post_type === 'zen_mp_popup') {
+            $version = class_exists('Zen_MailPoet_Helper') ? Zen_MailPoet_Helper::get_version() : '1.0.0';
             wp_enqueue_style(
                 'zen-mp-admin-style',
                 plugins_url('assets/css/admin.css', dirname(dirname(__FILE__))),
                 array(),
-                '1.0.0'
+                $version
             );
 
             wp_enqueue_script(
                 'zen-mp-admin-script',
                 plugins_url('assets/js/admin.js', dirname(dirname(__FILE__))),
                 array('jquery'),
-                '1.0.0',
+                $version,
                 true
             );
         }

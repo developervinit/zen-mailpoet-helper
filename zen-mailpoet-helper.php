@@ -35,6 +35,7 @@ class Zen_MailPoet_Helper {
     private function __construct() {
         add_shortcode('zen_mailpoet_popup', array($this, 'render_popup_shortcode'));
         add_action('wp_enqueue_scripts', array($this, 'register_assets'), 9);
+        add_action('init', array($this, 'maybe_clear_cache'));
         
         // Initialize admin and renderer components
         if (is_admin()) {
@@ -44,21 +45,93 @@ class Zen_MailPoet_Helper {
     }
 
     /**
+     * Compute a dynamic version string based on the latest modification time of plugin files.
+     */
+    public static function get_version() {
+        $plugin_dir = plugin_dir_path(__FILE__);
+        $files = array(
+            $plugin_dir . 'zen-mailpoet-helper.php',
+            $plugin_dir . 'assets/css/style.css',
+            $plugin_dir . 'assets/js/script.js',
+            $plugin_dir . 'assets/css/admin.css',
+            $plugin_dir . 'assets/js/admin.js',
+            $plugin_dir . 'includes/display/class-zen-popup-renderer.php',
+            $plugin_dir . 'includes/services/mailpoet-adapter.php',
+            $plugin_dir . 'includes/ajax/subscribe.php',
+            $plugin_dir . 'includes/admin/class-zen-popup-admin.php',
+            $plugin_dir . 'includes/admin/class-zen-popup-pages.php',
+        );
+        $max_mtime = 0;
+        foreach ($files as $file) {
+            if (file_exists($file)) {
+                $max_mtime = max($max_mtime, @filemtime($file));
+            }
+        }
+        return '1.0.0.' . ($max_mtime ? $max_mtime : time());
+    }
+
+    /**
+     * Purge all caching plugins if the plugin code version has changed.
+     */
+    public function maybe_clear_cache() {
+        $current_ver = self::get_version();
+        $stored_ver = get_option('zen_mp_code_version', '');
+        if ($current_ver !== $stored_ver) {
+            update_option('zen_mp_code_version', $current_ver);
+            
+            // W3 Total Cache
+            if (function_exists('w3tc_flush_all')) {
+                w3tc_flush_all();
+            }
+            // WP Super Cache
+            if (function_exists('wp_cache_clean_cache')) {
+                global $file_prefix;
+                wp_cache_clean_cache($file_prefix);
+            }
+            // LiteSpeed Cache
+            if (has_action('litespeed_purgesall')) {
+                do_action('litespeed_purgesall');
+            }
+            // WP Rocket
+            if (function_exists('rocket_clean_domain')) {
+                rocket_clean_domain();
+            }
+            // SG Optimizer
+            if (function_exists('sg_cachepress_purge_cache')) {
+                sg_cachepress_purge_cache();
+            }
+            // Autoptimize
+            if (class_exists('autoptimizeCache') && method_exists('autoptimizeCache', 'clearall')) {
+                autoptimizeCache::clearall();
+            }
+            // WP Fastest Cache
+            if (class_exists('WpFastestCache') && method_exists('WpFastestCache', 'deleteCache')) {
+                $wpfc = new WpFastestCache();
+                $wpfc->deleteCache(true);
+            }
+            // WP Object Cache & Transients
+            wp_cache_flush();
+        }
+    }
+
+    /**
      * Register scripts and styles so they can be enqueued conditionally.
      */
     public function register_assets() {
+        $version = self::get_version();
+
         wp_register_style(
             'zen-mailpoet-helper-style',
             plugins_url('assets/css/style.css', __FILE__),
             array(),
-            '1.0.0'
+            $version
         );
 
         wp_register_script(
             'zen-mailpoet-helper-script',
             plugins_url('assets/js/script.js', __FILE__),
             array('jquery'),
-            '1.0.0',
+            $version,
             true
         );
 
