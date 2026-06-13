@@ -22,11 +22,6 @@ class Zen_Popup_Renderer {
         return self::$instance;
     }
 
-    private function log_debug($msg) {
-        echo "<!-- ZEN_DEBUG: " . esc_html($msg) . " -->\n";
-        echo "<script>console.log('ZEN_DEBUG:', " . json_encode($msg) . ");</script>\n";
-    }
-
     private function __construct() {
         add_action('wp_enqueue_scripts', array($this, 'evaluate_and_enqueue_assets'), 11);
         add_action('wp_footer', array($this, 'maybe_render_global_popup'));
@@ -37,10 +32,6 @@ class Zen_Popup_Renderer {
      * Evaluates display rules and enqueues assets early in the page load.
      */
     public function evaluate_and_enqueue_assets() {
-        $this->log_debug('=== evaluate_and_enqueue_assets started ===');
-        $this->log_debug('is_admin: ' . (is_admin() ? 'yes' : 'no'));
-        $this->log_debug('Current URL/Request URI: ' . (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : 'unknown'));
-
         // Do not process in admin
         if (is_admin()) {
             return;
@@ -49,9 +40,7 @@ class Zen_Popup_Renderer {
         // Check global setting: Hide for logged-in users
         $hide_logged_in = get_option('zen_mp_hide_for_logged_in', 'no');
         $is_logged_in = is_user_logged_in();
-        $this->log_debug("hide_for_logged_in: {$hide_logged_in}, is_user_logged_in: " . ($is_logged_in ? 'yes' : 'no'));
         if ($hide_logged_in === 'yes' && $is_logged_in) {
-            $this->log_debug('Skipping: Hidden for logged-in users');
             return;
         }
 
@@ -64,45 +53,27 @@ class Zen_Popup_Renderer {
             'numberposts' => 1
         ));
 
-        $this->log_debug('Active posts found count: ' . count($active_posts));
         if (empty($active_posts)) {
-            // Let's log any zen_mp_popup posts to see if they exist but aren't matched
-            $all_popups = get_posts(array(
-                'post_type'   => 'zen_mp_popup',
-                'post_status' => 'any',
-                'numberposts' => -1
-            ));
-            $this->log_debug('Total zen_mp_popup posts in DB (any status): ' . count($all_popups));
-            foreach ($all_popups as $p) {
-                $enabled = get_post_meta($p->ID, '_zen_mp_enabled', true);
-                $this->log_debug("Popup ID: {$p->ID}, Title: '{$p->post_title}', Status: '{$p->post_status}', Enabled Meta: '{$enabled}'");
-            }
             return;
         }
 
         $popup = $active_posts[0];
-        $this->log_debug("Active popup matched: ID {$popup->ID}, Title: '{$popup->post_title}'");
 
         // Evaluate Display Rules
         $display_rules = get_post_meta($popup->ID, '_zen_mp_display_rules', true) ?: array('show_on' => 'all');
         $show_on = isset($display_rules['show_on']) ? $display_rules['show_on'] : 'all';
-        $this->log_debug("Display rules - show_on: {$show_on}");
 
         if ($show_on === 'selected') {
             $selected_pages = isset($display_rules['selected_pages']) ? $display_rules['selected_pages'] : array();
             $selected_pages = array_map('intval', $selected_pages);
-            $this->log_debug('Selected pages: ' . implode(',', $selected_pages));
             $is_match = is_page($selected_pages);
-            $this->log_debug('is_page match: ' . ($is_match ? 'yes' : 'no'));
             if (!$is_match) {
                 return;
             }
         } elseif ($show_on === 'excluded') {
             $excluded_pages = isset($display_rules['excluded_pages']) ? $display_rules['excluded_pages'] : array();
             $excluded_pages = array_map('intval', $excluded_pages);
-            $this->log_debug('Excluded pages: ' . implode(',', $excluded_pages));
             $is_match = is_page($excluded_pages);
-            $this->log_debug('is_page match: ' . ($is_match ? 'yes' : 'no'));
             if ($is_match) {
                 return;
             }
@@ -111,7 +82,6 @@ class Zen_Popup_Renderer {
         // Rules satisfied, store popup state and enqueue assets
         $this->should_render = true;
         $this->active_popup_id = $popup->ID;
-        $this->log_debug("Display rules satisfied. Setting should_render = true and enqueuing scripts.");
 
         wp_enqueue_style('zen-mailpoet-helper-style');
         wp_enqueue_script('zen-mailpoet-helper-script');
@@ -121,14 +91,12 @@ class Zen_Popup_Renderer {
      * Renders the active global popup in wp_footer if rules match.
      */
     public function maybe_render_global_popup() {
-        $this->log_debug("maybe_render_global_popup called. should_render: " . ($this->should_render ? 'yes' : 'no') . ", shortcode_rendered: " . (self::$shortcode_rendered ? 'yes' : 'no'));
         // Do not render in admin, if not flagged, or if a shortcode already rendered a popup
         if (is_admin() || !$this->should_render || self::$shortcode_rendered) {
             return;
         }
 
         // Render Popup HTML
-        $this->log_debug("Rendering global popup HTML for ID {$this->active_popup_id}");
         echo $this->get_popup_html($this->active_popup_id);
     }
 
