@@ -40,6 +40,23 @@ class Zen_MailPoet_Adapter {
             $subscriber_data['last_name'] = sanitize_text_field($metadata['last_name']);
         }
 
+        // Dynamically locate any required "privacy policy" custom fields and set to 1
+        try {
+            $fields = $mailpoet_api->getSubscriberFields();
+            if (is_array($fields)) {
+                foreach ($fields as $field) {
+                    if (isset($field['name'], $field['id'])) {
+                        $field_name = strtolower(trim($field['name']));
+                        if ($field_name === 'privacy policy' || $field_name === 'privacy-policy' || $field_name === 'privacy_policy') {
+                            $subscriber_data[$field['id']] = 1;
+                        }
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // Silence fields retrieval errors
+        }
+
         $subscriber_exists_code = 12; // MailPoet's SUBSCRIBER_EXISTS code
         if (class_exists('\MailPoet\API\MP\v1\APIException') && defined('\MailPoet\API\MP\v1\APIException::SUBSCRIBER_EXISTS')) {
             $subscriber_exists_code = \MailPoet\API\MP\v1\APIException::SUBSCRIBER_EXISTS;
