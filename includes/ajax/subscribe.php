@@ -88,7 +88,7 @@ class Zen_MailPoet_AJAX_Subscribe {
                 }
             } else {
                 // Adapter subscription failed with mapped error code
-                $mapped_msg = $msg_error;
+                $mapped_msg = $msg_error . ' (Debug: ' . $result['message'] . ')';
                 if ($result['code'] === 'email_invalid') {
                     $mapped_msg = __('Please enter a valid email address.', 'zen-mailpoet-helper');
                 } elseif ($result['code'] === 'email_required') {
