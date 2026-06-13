@@ -269,11 +269,16 @@ class Zen_Popup_Renderer {
         }
         $device_class_str = implode(' ', $device_classes);
 
-        // Load premium default slides/images
-        $images = array(
-            plugins_url('assets/images/bg1.png', dirname(dirname(__FILE__))),
-            plugins_url('assets/images/bg2.png', dirname(dirname(__FILE__)))
-        );
+        // Load custom configured images, fallback to default assets
+        $saved_images = get_post_meta($popup_id, '_zen_mp_images', true);
+        if (!empty($saved_images) && is_array($saved_images)) {
+            $images = array_map('esc_url', $saved_images);
+        } else {
+            $images = array(
+                plugins_url('assets/images/bg1.png', dirname(dirname(__FILE__))),
+                plugins_url('assets/images/bg2.png', dirname(dirname(__FILE__)))
+            );
+        }
 
         ob_start();
         ?>

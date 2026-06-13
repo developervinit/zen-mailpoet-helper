@@ -34,4 +34,48 @@ jQuery(document).ready(function($) {
     // Run display logic on load and on change
     $('input[name="zen_mp_show_on"]').on('change', handleDisplayRulesVisibility);
     handleDisplayRulesVisibility();
+
+    // 3. Media Uploader for Custom Images
+    $('.zen-mp-images-grid').on('click', '.zen-mp-add-image-btn', function(e) {
+        e.preventDefault();
+        var $slot = $(this).closest('.zen-mp-image-slot');
+        var $preview = $slot.find('.zen-mp-image-preview');
+        var $input = $slot.find('.zen-mp-image-input');
+        var $removeBtn = $slot.find('.zen-mp-remove-image-btn');
+        var $addBtn = $(this);
+
+        var file_frame = wp.media({
+            title: 'Select or Upload Popup Image',
+            button: {
+                text: 'Use this image'
+            },
+            multiple: false
+        });
+
+        file_frame.on('select', function() {
+            var attachment = file_frame.state().get('selection').first().toJSON();
+            $preview.css('background-image', 'url(' + attachment.url + ')');
+            $input.val(attachment.url);
+            $slot.removeClass('empty').addClass('has-image');
+            $addBtn.hide();
+            $removeBtn.show();
+        });
+
+        file_frame.open();
+    });
+
+    $('.zen-mp-images-grid').on('click', '.zen-mp-remove-image-btn', function(e) {
+        e.preventDefault();
+        var $slot = $(this).closest('.zen-mp-image-slot');
+        var $preview = $slot.find('.zen-mp-image-preview');
+        var $input = $slot.find('.zen-mp-image-input');
+        var $addBtn = $slot.find('.zen-mp-add-image-btn');
+        var $removeBtn = $(this);
+
+        $preview.css('background-image', 'none');
+        $input.val('');
+        $slot.removeClass('has-image').addClass('empty');
+        $removeBtn.hide();
+        $addBtn.show();
+    });
 });

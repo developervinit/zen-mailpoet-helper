@@ -164,3 +164,102 @@
     margin-bottom: 8px;
     font-weight: 500;
 }
+
+/* Image Manager Grid */
+.zen-mp-images-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 10px;
+    margin-top: 5px;
+}
+
+.zen-mp-image-slot {
+    width: 120px;
+    height: 160px;
+    background: #fafafa;
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.zen-mp-image-slot:hover {
+    border-color: #cca853;
+}
+
+.zen-mp-image-slot.has-image {
+    border-style: solid;
+    border-color: #e2e8f0;
+}
+
+.zen-mp-image-preview {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: none;
+}
+
+.zen-mp-image-slot.has-image .zen-mp-image-preview {
+    display: block;
+}
+
+.zen-mp-image-actions {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    border-top: 1px solid #e2e8f0;
+    padding: 8px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    transition: transform 0.2s ease;
+}
+
+/* For empty slots, actions are centered and visible */
+.zen-mp-image-slot.empty .zen-mp-image-actions {
+    position: static;
+    background: none;
+    border: none;
+    width: 100%;
+    height: 100%;
+    transform: none;
+}
+
+.zen-mp-image-slot.empty .zen-mp-add-image-btn {
+    display: block;
+    width: 85%;
+    margin: 0 auto;
+    font-size: 11px;
+    height: auto;
+    line-height: 2.2;
+    text-align: center;
+    padding: 0 4px;
+}
+
+.zen-mp-image-slot.has-image .zen-mp-image-actions {
+    transform: translateY(100%);
+}
+
+.zen-mp-image-slot.has-image:hover .zen-mp-image-actions {
+    transform: translateY(0);
+}
+
+.zen-mp-remove-image-btn {
+    font-size: 11px !important;
+    height: auto !important;
+    line-height: 2 !important;
+    padding: 0 10px !important;
+    margin: 0 !important;
+}

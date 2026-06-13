@@ -412,6 +412,33 @@ class Zen_Popup_Admin {
                                 <input type="text" id="zen_mp_error_message" name="zen_mp_error_message" value="<?php echo esc_attr($error_message); ?>" class="large-text" placeholder="An error occurred. Please try again.">
                             </td>
                         </tr>
+                        <tr>
+                            <th scope="row"><label><?php _e('Popup Images (Up to 5)', 'zen-mailpoet-helper'); ?></label></th>
+                            <td>
+                                <div class="zen-mp-image-manager">
+                                    <div class="zen-mp-images-grid" id="zen-mp-images-grid">
+                                        <?php
+                                        $saved_images = get_post_meta($post->ID, '_zen_mp_images', true) ?: array();
+                                        for ($i = 0; $i < 5; $i++) {
+                                            $img_url = isset($saved_images[$i]) ? $saved_images[$i] : '';
+                                            $has_image = !empty($img_url);
+                                            ?>
+                                            <div class="zen-mp-image-slot <?php echo $has_image ? 'has-image' : 'empty'; ?>" data-slot="<?php echo $i; ?>">
+                                                <div class="zen-mp-image-preview" style="background-image: url('<?php echo esc_url($img_url); ?>');"></div>
+                                                <div class="zen-mp-image-actions">
+                                                    <button type="button" class="button zen-mp-add-image-btn" <?php echo $has_image ? 'style="display:none;"' : ''; ?>><?php _e('Add Image', 'zen-mailpoet-helper'); ?></button>
+                                                    <button type="button" class="button button-link-delete zen-mp-remove-image-btn" <?php echo !$has_image ? 'style="display:none;"' : ''; ?>><?php _e('Remove', 'zen-mailpoet-helper'); ?></button>
+                                                </div>
+                                                <input type="hidden" name="zen_mp_images[]" class="zen-mp-image-input" value="<?php echo esc_attr($img_url); ?>">
+                                            </div>
+                                            <?php
+                                        }
+                                        ?>
+                                    </div>
+                                    <p class="description"><?php _e('Upload or select up to 5 images for the left-side slideshow. Recommend image size: 600x800px.', 'zen-mailpoet-helper'); ?></p>
+                                </div>
+                            </td>
+                        </tr>
                     </table>
                 </div>
 
@@ -579,6 +606,16 @@ class Zen_Popup_Admin {
             update_post_meta($post_id, '_zen_mp_error_message', sanitize_text_field($_POST['zen_mp_error_message']));
         }
 
+        // Save customized images list
+        if (isset($_POST['zen_mp_images'])) {
+            $images = array_map('esc_url_raw', $_POST['zen_mp_images']);
+            $images = array_filter($images);
+            $images = array_values($images);
+            update_post_meta($post_id, '_zen_mp_images', $images);
+        } else {
+            delete_post_meta($post_id, '_zen_mp_images');
+        }
+
         // 3. Lists
         $list_ids = isset($_POST['zen_mp_list_ids']) ? array_map('intval', $_POST['zen_mp_list_ids']) : array();
         update_post_meta($post_id, '_zen_mp_list_ids', $list_ids);
@@ -615,6 +652,8 @@ class Zen_Popup_Admin {
         // Enqueue only on CPT screen
         global $post_type;
         if (($hook === 'post.php' || $hook === 'post-new.php') && $post_type === 'zen_mp_popup') {
+            wp_enqueue_media();
+            
             $version = class_exists('Zen_MailPoet_Helper') ? Zen_MailPoet_Helper::get_version() : '1.0.0';
             wp_enqueue_style(
                 'zen-mp-admin-style',
