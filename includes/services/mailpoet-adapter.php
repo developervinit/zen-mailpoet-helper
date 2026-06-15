@@ -119,7 +119,7 @@ class Zen_MailPoet_Adapter {
     }
 
     /**
-     * Map MailPoet errors to our custom codes and messages.
+     * Map MailPoet errors to our custom codes and messages, and log them.
      */
     private function map_errors(\Exception $e) {
         $message = $e->getMessage();
@@ -137,10 +137,32 @@ class Zen_MailPoet_Adapter {
             $code = 'email_invalid';
         }
 
+        // Log the exact error message
+        $this->log_error(sprintf('Zen MailPoet Helper Subscription Error: %s (Code: %s)', $message, $error_code));
+
         return array(
             'success' => false,
             'code'    => $code,
             'message' => $message
         );
+    }
+
+    /**
+     * Log an error to WooCommerce logger if available, otherwise to the PHP error log.
+     *
+     * @param string $message
+     */
+    public function log_error($message) {
+        if (function_exists('wc_get_logger')) {
+            try {
+                $logger = wc_get_logger();
+                $context = array('source' => 'zen-mailpoet-helper');
+                $logger->error($message, $context);
+            } catch (\Exception $e) {
+                error_log($message);
+            }
+        } else {
+            error_log($message);
+        }
     }
 }
