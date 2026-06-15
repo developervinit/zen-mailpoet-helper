@@ -376,11 +376,16 @@
 @media (max-width: 768px) {
     .zen-mp-modal-card {
         max-width: 440px;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
     }
     
     .zen-mp-layout-split {
         flex-direction: column;
         height: auto;
+        overflow-y: auto;
+        flex: 1;
     }
     
     .zen-mp-col-media {
