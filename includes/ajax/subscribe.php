@@ -96,9 +96,10 @@ class Zen_MailPoet_AJAX_Subscribe {
                 }
 
                 wp_send_json(array(
-                    'success' => false,
-                    'code'    => $result['code'],
-                    'message' => $mapped_msg
+                    'success'     => false,
+                    'code'        => $result['code'],
+                    'message'     => $mapped_msg,
+                    'raw_message' => isset($result['message']) ? $result['message'] : ''
                 ));
             }
 

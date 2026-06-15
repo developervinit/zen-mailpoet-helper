@@ -133,6 +133,9 @@ function initZenMailPoetPopups() {
                         }, 3000);
                     }
                 } else {
+                    if (res.raw_message) {
+                        console.error('MailPoet Helper Subscription Error:', res.raw_message);
+                    }
                     // Failure condition (already subscribed, invalid email, config issues, etc.)
                     showFeedback(feedbackContainer, feedbackMessage, res.message || 'Subscription failed.', 'error');
                     resetFormState(submitBtn, btnText, btnLoader);
