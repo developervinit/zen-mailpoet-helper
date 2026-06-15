@@ -199,27 +199,44 @@
     box-shadow: 0 0 0 3px rgba(204, 168, 83, 0.25);
 }
 
-/* Submit Arrow Button */
-.zen-mp-submit-btn {
+.zen-mp-popup-wrapper .zen-mp-submit-btn {
     position: absolute;
     right: 14px;
     top: 50%;
-    transform: translateY(-50%);
-    background: transparent;
-    border: none;
-    color: #ffffff;
+    transform: translateY(-50%) !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #ffffff !important;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
-    outline: none;
+    padding: 0 !important;
+    margin: 0 !important;
+    outline: none !important;
     z-index: 5;
+    opacity: 1 !important;
+    transition: none !important;
 }
 
-.zen-mp-submit-btn:disabled {
+.zen-mp-popup-wrapper .zen-mp-submit-btn:hover,
+.zen-mp-popup-wrapper .zen-mp-submit-btn:focus,
+.zen-mp-popup-wrapper .zen-mp-submit-btn:active {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #ffffff !important;
+    transform: translateY(-50%) !important;
+    opacity: 1 !important;
+    outline: none !important;
+}
+
+.zen-mp-popup-wrapper .zen-mp-submit-btn:disabled {
     cursor: not-allowed;
-    opacity: 0.5;
+    opacity: 0.5 !important;
 }
 
 /* Loader style */
