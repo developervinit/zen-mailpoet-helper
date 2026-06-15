@@ -133,7 +133,7 @@
 /* Right Column: Content Form */
 .zen-mp-col-content {
     flex: 1;
-    background-color: var(--zen-dark);
+    background-color: #444444;
     height: 100%;
     padding: 50px 48px;
     display: flex;
@@ -183,7 +183,7 @@
     border: 1.5px solid var(--zen-border);
     border-radius: 8px;
     outline: none;
-    background: transparent;
+    background: #3f3e3e;
     color: #ffffff;
     font-family: var(--zen-font);
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
