@@ -384,10 +384,13 @@
     }
     
     .zen-mp-col-media {
-        height: 180px;
+        flex: none;
+        height: 300px;
     }
     
     .zen-mp-col-content {
+        flex: none;
+        height: auto;
         padding: 36px 24px;
         text-align: center;
     }
