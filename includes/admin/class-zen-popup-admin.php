@@ -324,6 +324,7 @@ class Zen_Popup_Admin {
         $button_text = get_post_meta($post->ID, '_zen_mp_button_text', true) ?: '';
         $success_message = get_post_meta($post->ID, '_zen_mp_success_message', true) ?: '';
         $error_message = get_post_meta($post->ID, '_zen_mp_error_message', true) ?: '';
+        $privacy_page_id = get_post_meta($post->ID, '_zen_mp_privacy_page_id', true) ?: '';
         
         $list_ids = get_post_meta($post->ID, '_zen_mp_list_ids', true) ?: array();
         
@@ -533,6 +534,20 @@ class Zen_Popup_Admin {
                             </td>
                         </tr>
                         <tr>
+                            <th scope="row"><label for="zen_mp_privacy_page_id"><?php _e('Privacy Policy Page', 'zen-mailpoet-helper'); ?></label></th>
+                            <td>
+                                <select id="zen_mp_privacy_page_id" name="zen_mp_privacy_page_id">
+                                    <option value=""><?php _e('-- Select Page --', 'zen-mailpoet-helper'); ?></option>
+                                    <?php foreach ($all_pages as $page) : ?>
+                                        <option value="<?php echo esc_attr($page->ID); ?>" <?php selected($privacy_page_id, $page->ID); ?>>
+                                            <?php echo esc_html($page->post_title); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <p class="description"><?php _e('Select the page that the "Privacy Policy" link in the popup will redirect to.', 'zen-mailpoet-helper'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
                             <th scope="row"><label><?php _e('Target Devices', 'zen-mailpoet-helper'); ?></label></th>
                             <td>
                                 <?php
@@ -643,6 +658,11 @@ class Zen_Popup_Admin {
             'devices' => $devices
         );
         update_post_meta($post_id, '_zen_mp_behavior_rules', $behavior_rules);
+
+        // 6. Privacy Policy Page
+        if (isset($_POST['zen_mp_privacy_page_id'])) {
+            update_post_meta($post_id, '_zen_mp_privacy_page_id', intval($_POST['zen_mp_privacy_page_id']));
+        }
     }
 
     /**

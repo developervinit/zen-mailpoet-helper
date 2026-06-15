@@ -247,6 +247,8 @@ class Zen_Popup_Renderer {
         $success_message = get_post_meta($popup_id, '_zen_mp_success_message', true) ?: __('Subscribed successfully!', 'zen-mailpoet-helper');
         $error_message = get_post_meta($popup_id, '_zen_mp_error_message', true) ?: __('An error occurred. Please try again.', 'zen-mailpoet-helper');
         $already_message = __('You are already subscribed to this newsletter.', 'zen-mailpoet-helper');
+        $privacy_page_id = get_post_meta($popup_id, '_zen_mp_privacy_page_id', true);
+        $privacy_link = !empty($privacy_page_id) ? get_permalink($privacy_page_id) : '#privacy';
 
         $list_ids = get_post_meta($popup_id, '_zen_mp_list_ids', true) ?: array();
         $list_ids_str = implode(',', $list_ids);
@@ -337,7 +339,7 @@ class Zen_Popup_Renderer {
                                         <span class="zen-mp-checkbox-box"></span>
                                         <span class="zen-mp-checkbox-text">
                                             <?php 
-                                            $link_html = '<a href="#privacy" target="_blank" class="zen-mp-privacy-link">' . esc_html__('Privacy Policy', 'zen-mailpoet-helper') . '</a>';
+                                            $link_html = '<a href="' . esc_url($privacy_link) . '" target="_blank" class="zen-mp-privacy-link">' . esc_html__('Privacy Policy', 'zen-mailpoet-helper') . '</a>';
                                             echo sprintf(__('I accept the %s', 'zen-mailpoet-helper'), $link_html);
                                             ?>
                                         </span>
