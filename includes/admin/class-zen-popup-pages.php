@@ -61,13 +61,6 @@ class Zen_Popup_Pages {
                             <p style="margin: 0; color: #666;"><?php _e('Target specific pages or the entire website under the Display Rules tab. Set open delays and device rules under Behavior.', 'zen-mailpoet-helper'); ?></p>
                         </div>
 
-                        <div class="guide-step">
-                            <h4 style="margin: 0 0 6px 0; color: #cca853;">3. <?php _e('Shortcode Embedding (Optional)', 'zen-mailpoet-helper'); ?></h4>
-                            <p style="margin: 0; color: #666;">
-                                <?php _e('Embed the popup inline using the shortcode: ', 'zen-mailpoet-helper'); ?>
-                                <code style="background: #f0f0f0; padding: 3px 6px; border-radius: 4px; font-family: monospace;">[zen_mailpoet_popup list_ids="3"]</code>
-                            </p>
-                        </div>
                     </div>
                 </div>
 
