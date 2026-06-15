@@ -176,24 +176,25 @@
     margin-bottom: 20px;
 }
 
-.zen-mp-input-email {
+.zen-mp-popup-wrapper .zen-mp-input-email {
     width: 100%;
     padding: 16px 54px 16px 20px;
     font-size: 16px;
     border: 1.5px solid var(--zen-border);
     border-radius: 8px;
     outline: none;
-    background: #3f3e3e;
+    background: #3f3e3e !important;
+    background-color: #3f3e3e !important;
     color: #ffffff;
     font-family: var(--zen-font);
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.zen-mp-input-email::placeholder {
+.zen-mp-popup-wrapper .zen-mp-input-email::placeholder {
     color: rgba(255, 255, 255, 0.4);
 }
 
-.zen-mp-input-email:focus {
+.zen-mp-popup-wrapper .zen-mp-input-email:focus {
     border-color: var(--zen-primary);
     box-shadow: 0 0 0 3px rgba(204, 168, 83, 0.25);
 }
