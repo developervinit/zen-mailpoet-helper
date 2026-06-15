@@ -195,9 +195,9 @@ class Zen_Popup_Renderer {
                                     <input type="email" class="zen-mp-input-email" placeholder="<?php esc_attr_e('Enter your email', 'zen-mailpoet-helper'); ?>" required />
                                     <button type="submit" class="zen-mp-submit-btn" aria-label="<?php esc_attr_e('Subscribe', 'zen-mailpoet-helper'); ?>">
                                         <span class="zen-mp-btn-text">
-                                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                                                <polyline points="12 5 19 12 12 19"></polyline>
+                                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                                <polyline points="15 5 22 12 15 19"></polyline>
                                             </svg>
                                         </span>
                                         <span class="zen-mp-btn-loader" style="display: none;"></span>
@@ -322,9 +322,9 @@ class Zen_Popup_Renderer {
                                     <input type="email" class="zen-mp-input-email" placeholder="<?php echo esc_attr($placeholder); ?>" required />
                                     <button type="submit" class="zen-mp-submit-btn" aria-label="<?php echo esc_attr($button_text); ?>">
                                         <span class="zen-mp-btn-text">
-                                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                                                <polyline points="12 5 19 12 12 19"></polyline>
+                                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                                <polyline points="15 5 22 12 15 19"></polyline>
                                             </svg>
                                         </span>
                                         <span class="zen-mp-btn-loader" style="display: none;"></span>
